@@ -49,12 +49,6 @@ Its change of IDE do you use
 Note: Database already running, where you have to create a new
 Schema with name int the application.properties file, my case is `security_example`
 
-## What can implemented in future versions
-
--Use the role system in frontend
--Make page with data of user profile
--Use form restrictions on login page
-
 ## References
 
 Bezkoder - (https://www.bezkoder.com/spring-boot-login-example-mysql/)
