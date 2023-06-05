@@ -3,8 +3,8 @@ package com.esl.springbootlogin.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -148,7 +148,7 @@ public class AuthController {
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN_OWNER')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN_OWNER')")
     public ResponseEntity<List<UserInfoResponse>> getAllUsers() {
         try {
             List<UserInfoResponse> userInfoResponses = authservice.getAllUsersService();
@@ -176,5 +176,11 @@ public class AuthController {
         } catch (Exception e) {
             return new ResponseEntity<>("Sem usuario autenticado", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN_OWNER')")
+    public String adminAccess() {
+        return "Admin board";
     }
 }

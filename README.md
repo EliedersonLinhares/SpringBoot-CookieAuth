@@ -2,7 +2,12 @@
 
 This project was intended to develop on system with security system
 where JWT token is put on cookies for security purposes.currently
-developed on java 8
+developed on java 17
+
+v2.0
+Upgrade to java 17
+Upgrade to spring 3.0.6
+Upgrade to jsonwebtoken to 0.11
 
 ## FronEnd system
 

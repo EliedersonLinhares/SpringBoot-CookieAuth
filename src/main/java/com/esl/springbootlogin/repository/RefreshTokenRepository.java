@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.esl.springbootlogin.model.User;
 import com.esl.springbootlogin.payload.jwt.RefreshToken;
 
-@Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);
 

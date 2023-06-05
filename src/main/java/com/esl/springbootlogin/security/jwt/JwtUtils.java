@@ -1,9 +1,10 @@
 package com.esl.springbootlogin.security.jwt;
 
+import java.security.Key;
 import java.util.Date;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,9 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 /**
  *
@@ -49,17 +51,6 @@ public class JwtUtils {
     @Value("${esl.app.jwtCookieName}")
     private String jwtCookie;
 
-    /*
-     * public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
-     * String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-     * return generateCookie(jwtCookie, jwt, "/api");
-     * }
-     * 
-     * public ResponseCookie generateJwtCookie(User user) {
-     * String jwt = generateTokenFromUsername(user.getUsername());
-     * return generateCookie(jwtCookie, jwt, "/api");
-     * }
-     */
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getEmail());
         return generateCookie(jwtCookie, jwt, "/api");
@@ -91,15 +82,14 @@ public class JwtUtils {
     }
 
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(authToken);
             return true;
-        } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
+
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
@@ -118,8 +108,13 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    private Key getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
