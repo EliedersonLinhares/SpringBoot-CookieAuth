@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,64 +16,48 @@ import org.springframework.stereotype.Service;
 import com.esl.springbootlogin.model.ERole;
 import com.esl.springbootlogin.model.Role;
 import com.esl.springbootlogin.model.User;
-import com.esl.springbootlogin.payload.request.SignupRequest;
+import com.esl.springbootlogin.payload.request.SignupRequestRecord;
 import com.esl.springbootlogin.payload.response.UserInfoResponse;
 import com.esl.springbootlogin.repository.RoleRepository;
 import com.esl.springbootlogin.repository.UserRepository;
-import com.esl.springbootlogin.security.jwt.JwtUtils;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
+    private final RefreshTokenService refreshTokenService;
 
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    RefreshTokenService refreshTokenService;
-
-    public void register(SignupRequest signUpRequest) {
+    public void register(SignupRequestRecord signUpRequest) {
 
         // Create new user's account
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+        User user = new User(signUpRequest.username(),
+                signUpRequest.email(),
+                encoder.encode(signUpRequest.password()));
 
-        Set<String> strRoles = signUpRequest.getRole();
+        Set<String> strRoles = signUpRequest.role();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null) {
+        if (Objects.isNull(strRoles)) {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Tipo de permissão não encontrado"));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN_OWNER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+                if (role.equals("admin")) {
+                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN_OWNER).get();
+                    roles.add(adminRole);
                 }
+                if (role.equals("mod")) {
+                    Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR).get();
+                    roles.add(modRole);
+                }
+
             });
         }
 
@@ -91,12 +74,12 @@ public class AuthService {
 
     }
 
-    public boolean duplicateUser(SignupRequest signUpRequest) {
-        return userRepository.existsByUsername(signUpRequest.getUsername());
+    public boolean duplicateUser(SignupRequestRecord signUpRequest) {
+        return userRepository.existsByUsername(signUpRequest.username());
     }
 
-    public boolean duplicateEmail(SignupRequest signUpRequest) {
-        return userRepository.existsByEmail(signUpRequest.getEmail());
+    public boolean duplicateEmail(SignupRequestRecord signUpRequest) {
+        return userRepository.existsByEmail(signUpRequest.email());
     }
 
     public UserInfoResponse convertEntityToDto(User user) {

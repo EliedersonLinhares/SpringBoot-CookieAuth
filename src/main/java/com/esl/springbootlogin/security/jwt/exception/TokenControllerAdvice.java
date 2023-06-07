@@ -16,12 +16,5 @@ public class TokenControllerAdvice {
         return new ErrorMessage(
                 ex.getMessage());
     }
-    /*
-     * return new ErrorMessage(
-     * HttpStatus.FORBIDDEN.value(),
-     * new Date(),
-     * ex.getMessage(),
-     * request.getDescription(false));
-     * }
-     */
+
 }

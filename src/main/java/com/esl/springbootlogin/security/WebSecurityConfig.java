@@ -1,6 +1,5 @@
 package com.esl.springbootlogin.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,14 +17,15 @@ import com.esl.springbootlogin.security.jwt.AuthEntryPointJwt;
 import com.esl.springbootlogin.security.jwt.AuthTokenFilter;
 import com.esl.springbootlogin.security.services.UserDetailsServiceImpl;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -54,12 +54,13 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
+        http.cors(cors -> cors.disable())
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/test/**").permitAll())
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .exceptionHandling(exc -> exc.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS));
 
         http.authenticationProvider(authenticationProvider());
 

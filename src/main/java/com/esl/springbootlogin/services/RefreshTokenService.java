@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,24 +25,25 @@ verifyExpiration(): Verify whether the token provided
 has expired or not. If the token was expired, 
 delete it from database and throw TokenRefreshException */
 @Service
+@RequiredArgsConstructor
 public class RefreshTokenService {
     @Value("${esl.app.jwtRefreshExpirationMs}")
     private Long refreshTokenDurationMs;
 
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
 
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
 
     public RefreshToken createRefreshToken(Long userId) {
+
         RefreshToken refreshToken = new RefreshToken();
 
-        refreshToken.setUser(userRepository.findById(userId).get());
+        refreshToken.setUser(
+                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado")));
+
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
@@ -62,6 +63,7 @@ public class RefreshTokenService {
 
     @Transactional
     public int deleteByUserId(Long userId) {
-        return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+        return refreshTokenRepository.deleteByUser(
+                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado")));
     }
 }

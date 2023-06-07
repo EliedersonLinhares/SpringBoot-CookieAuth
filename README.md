@@ -1,4 +1,8 @@
-# Java - SpringBoot - Cookie Auth
+# Java - SpringBoot - Security System with cookies🍪🔒
+
+<img src="https://icongr.am/devicon/java-original.svg?size=128&color=currentColor" alt="java" width="40" height="40"/> </a>
+</a> <a href="https://spring.io/" target="_blank"> <img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" alt="spring" width="40" height="40"/> </a>
+<img src="https://icongr.am/devicon/mysql-original-wordmark.svg?size=128&color=currentColor" alt="java" width="40" height="40"/> </a>
 
 This project was intended to develop on system with security system
 where JWT token is put on cookies for security purposes.currently
@@ -6,8 +10,12 @@ developed on java 17
 
 v2.0
 Upgrade to java 17
-Upgrade to spring 3.0.6
+
+Upgrade to spring 3.0.7
+
 Upgrade to jsonwebtoken to 0.11
+
+Refatoring Some dto's to use java records
 
 ## FronEnd system
 
@@ -21,7 +29,11 @@ Angular14-CookieAuth - https://github.com/EliedersonLinhares/Angular14-CookieAut
 
 `Refresh-token` -> To renew tokens for actual user
 
+`Use roles` -> To limit access in endpoints
+
 `Use real database` -> MySql is used but can be change to another like PostgreSQL
+
+`Validators` -> personalized errors messages for authentication,authorization and validation
 
 ## EndPoints
 
@@ -53,6 +65,11 @@ Its change of IDE do you use
 
 Note: Database already running, where you have to create a new
 Schema with name int the application.properties file, my case is `security_example`
+
+## Future plans
+
+- Use email for register confirmation
+- Use email fro reset password funcionality
 
 ## References
 

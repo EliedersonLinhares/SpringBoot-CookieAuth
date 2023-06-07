@@ -2,6 +2,7 @@ package com.esl.springbootlogin.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Objects;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -123,7 +124,7 @@ public class JwtUtils {
 
     private String getCookieValueByName(HttpServletRequest request, String name) {
         Cookie cookie = WebUtils.getCookie(request, name);
-        if (cookie != null) {
+        if (Objects.nonNull(cookie)) {
             return cookie.getValue();
         } else {
             return null;

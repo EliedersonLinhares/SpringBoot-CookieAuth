@@ -3,10 +3,6 @@ package com.esl.springbootlogin.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -16,23 +12,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import com.esl.springbootlogin.payload.jwt.RefreshToken;
-import com.esl.springbootlogin.payload.request.LoginRequest;
-import com.esl.springbootlogin.payload.request.SignupRequest;
-import com.esl.springbootlogin.payload.response.MessageResponse;
+import com.esl.springbootlogin.payload.request.LoginRequestRecord;
+import com.esl.springbootlogin.payload.request.SignupRequestRecord;
+import com.esl.springbootlogin.payload.response.MessageResponseRecord;
 import com.esl.springbootlogin.payload.response.UserInfoResponse;
-import com.esl.springbootlogin.repository.RoleRepository;
-import com.esl.springbootlogin.repository.UserRepository;
 import com.esl.springbootlogin.security.jwt.JwtUtils;
 import com.esl.springbootlogin.security.jwt.exception.TokenRefreshException;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;
@@ -40,49 +32,35 @@ import com.esl.springbootlogin.services.AuthService;
 import com.esl.springbootlogin.services.LoggedInUser;
 import com.esl.springbootlogin.services.RefreshTokenService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
 // @CrossOrigin("http://localhost:4200")
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    RefreshTokenService refreshTokenService;
-
-    @Autowired
-    AuthService authservice;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
+    private final AuthService authservice;
 
     @PostMapping("/signin")
-    public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequestRecord loginRequest) {
 
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
-                        loginRequest.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email(),
+                        loginRequest.password()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
@@ -91,24 +69,21 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body(new UserInfoResponse(userDetails.getId(),
-                        userDetails.getUsername(),
-                        userDetails.getEmail(),
-                        roles));
+                .body("Usuário logado com sucesso!");
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignupRequestRecord signUpRequest) {
         if (authservice.duplicateUser(signUpRequest)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponseRecord("Error: Username is already taken!"));
         }
         if (authservice.duplicateEmail(signUpRequest)) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+            return ResponseEntity.badRequest().body(new MessageResponseRecord("Error: Email is already in use!"));
         }
 
         authservice.register(signUpRequest);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponseRecord("Usuário cadastrado com sucesso!"));
     }
 
     @PostMapping("/signout")
@@ -121,11 +96,11 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body(new MessageResponse("You've been signed out!"));
+                .body(new MessageResponseRecord("Usuário deslogado com sucesso!"));
     }
 
     @GetMapping("/refreshtoken")
-    public ResponseEntity<MessageResponse> refreshtoken(HttpServletRequest request) {
+    public ResponseEntity<MessageResponseRecord> refreshtoken(HttpServletRequest request) {
         String refreshToken = jwtUtils.getJwtRefreshFromCookies(request);
 
         if ((refreshToken != null) && (refreshToken.length() > 0)) {
@@ -138,13 +113,13 @@ public class AuthController {
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, refreshToken)
-                                .body(new MessageResponse("Token is refreshed successfully!"));
+                                .body(new MessageResponseRecord("Token atualizado com sucesso!"));
                     })
                     .orElseThrow(() -> new TokenRefreshException(refreshToken,
-                            "Refresh token is not in database!"));
+                            "token não consta na base de dados!"));
         }
 
-        return ResponseEntity.badRequest().body(new MessageResponse("Refresh Token is empty!"));
+        return ResponseEntity.badRequest().body(new MessageResponseRecord("Token atualiado está vazio!"));
     }
 
     @GetMapping("/users")

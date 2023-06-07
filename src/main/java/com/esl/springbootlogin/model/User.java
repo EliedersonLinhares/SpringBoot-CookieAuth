@@ -14,21 +14,16 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
 })
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class User {
 
@@ -36,19 +31,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(max = 20)
     @Column(name = "username")
     private String username;
 
-    @NotBlank
-    @Size(max = 50)
-    @Email
     @Column(name = "email")
     private String email;
 
-    @NotBlank
-    @Size(max = 120)
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)
