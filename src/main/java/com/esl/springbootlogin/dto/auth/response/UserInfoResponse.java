@@ -1,4 +1,4 @@
-package com.esl.springbootlogin.payload.response;
+package com.esl.springbootlogin.dto.auth.response;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.esl.springbootlogin.payload.jwt.RefreshToken;
-import com.esl.springbootlogin.payload.request.LoginRequestRecord;
-import com.esl.springbootlogin.payload.request.SignupRequestRecord;
-import com.esl.springbootlogin.payload.response.MessageResponseRecord;
-import com.esl.springbootlogin.payload.response.UserInfoResponse;
+import com.esl.springbootlogin.dto.auth.request.LoginRequestRecord;
+import com.esl.springbootlogin.dto.auth.request.SignupRequestRecord;
+import com.esl.springbootlogin.dto.auth.response.MessageResponseRecord;
+import com.esl.springbootlogin.dto.auth.response.UserInfoResponse;
+import com.esl.springbootlogin.model.jwt.RefreshToken;
 import com.esl.springbootlogin.security.jwt.JwtUtils;
 import com.esl.springbootlogin.security.jwt.exception.refreshtoken.TokenRefreshException;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;

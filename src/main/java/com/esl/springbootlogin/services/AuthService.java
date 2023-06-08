@@ -13,11 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.esl.springbootlogin.dto.auth.request.SignupRequestRecord;
+import com.esl.springbootlogin.dto.auth.response.UserInfoResponse;
 import com.esl.springbootlogin.model.ERole;
 import com.esl.springbootlogin.model.Role;
 import com.esl.springbootlogin.model.User;
-import com.esl.springbootlogin.payload.request.SignupRequestRecord;
-import com.esl.springbootlogin.payload.response.UserInfoResponse;
 import com.esl.springbootlogin.repository.RoleRepository;
 import com.esl.springbootlogin.repository.UserRepository;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;

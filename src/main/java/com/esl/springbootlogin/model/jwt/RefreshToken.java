@@ -1,4 +1,4 @@
-package com.esl.springbootlogin.payload.jwt;
+package com.esl.springbootlogin.model.jwt;
 
 import java.time.Instant;
 
@@ -12,11 +12,9 @@ import jakarta.persistence.OneToOne;
 
 import com.esl.springbootlogin.model.User;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @Entity(name = "refreshtoken")
 public class RefreshToken {
     @Id

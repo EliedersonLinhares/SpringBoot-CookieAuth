@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 
 import com.esl.springbootlogin.model.User;
-import com.esl.springbootlogin.payload.jwt.RefreshToken;
+import com.esl.springbootlogin.model.jwt.RefreshToken;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);

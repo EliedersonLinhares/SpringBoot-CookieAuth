@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.esl.springbootlogin.payload.jwt.RefreshToken;
+import com.esl.springbootlogin.model.jwt.RefreshToken;
 import com.esl.springbootlogin.repository.RefreshTokenRepository;
 import com.esl.springbootlogin.repository.UserRepository;
 import com.esl.springbootlogin.security.jwt.exception.refreshtoken.TokenRefreshException;
@@ -55,7 +55,7 @@ public class RefreshTokenService {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
             throw new TokenRefreshException(token.getToken(),
-                    "Refresh token was expired. Please make a new signin request");
+                    "O token expirou, faça login novamente.");
         }
 
         return token;
