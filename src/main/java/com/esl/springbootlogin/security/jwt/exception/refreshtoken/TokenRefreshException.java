@@ -1,4 +1,4 @@
-package com.esl.springbootlogin.security.jwt.exception;
+package com.esl.springbootlogin.security.jwt.exception.refreshtoken;
 
 import org.springframework.web.bind.annotation.ResponseStatus;
 

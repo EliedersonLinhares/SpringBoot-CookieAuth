@@ -13,8 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.esl.springbootlogin.security.jwt.AuthEntryPointJwt;
 import com.esl.springbootlogin.security.jwt.AuthTokenFilter;
+import com.esl.springbootlogin.security.jwt.exception.AuthExceptionHandler;
 import com.esl.springbootlogin.security.services.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsServiceImpl userDetailsService;
-    private final AuthEntryPointJwt unauthorizedHandler;
+    private final AuthExceptionHandler unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {

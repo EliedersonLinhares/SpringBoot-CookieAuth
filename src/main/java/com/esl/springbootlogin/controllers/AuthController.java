@@ -26,7 +26,7 @@ import com.esl.springbootlogin.payload.request.SignupRequestRecord;
 import com.esl.springbootlogin.payload.response.MessageResponseRecord;
 import com.esl.springbootlogin.payload.response.UserInfoResponse;
 import com.esl.springbootlogin.security.jwt.JwtUtils;
-import com.esl.springbootlogin.security.jwt.exception.TokenRefreshException;
+import com.esl.springbootlogin.security.jwt.exception.refreshtoken.TokenRefreshException;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;
 import com.esl.springbootlogin.services.AuthService;
 import com.esl.springbootlogin.services.LoggedInUser;

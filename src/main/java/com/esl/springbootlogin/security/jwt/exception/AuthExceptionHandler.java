@@ -1,4 +1,4 @@
-package com.esl.springbootlogin.security.jwt;
+package com.esl.springbootlogin.security.jwt.exception;
 
 import java.io.IOException;
 import java.net.URI;
@@ -32,7 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 //AuthenticationException será ativado 
 @ControllerAdvice
 @Component
-public class AuthEntryPointJwt implements AuthenticationEntryPoint {
+public class AuthExceptionHandler implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -57,18 +57,6 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     }
 
-    private ProblemDetail details(HttpServletRequest request, String title, String detail) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        problemDetail.setTitle(title);
-        problemDetail.setDetail(detail);
-        problemDetail.setType(URI.create(request.getServletPath()));
-        problemDetail.setProperty("TimeStamp", dtf.format(now));
-        return problemDetail;
-    }
-
     @ExceptionHandler(value = { AccessDeniedException.class })
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException {
@@ -80,6 +68,18 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), problemDetail);
+    }
+
+    private ProblemDetail details(HttpServletRequest request, String title, String detail) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        problemDetail.setTitle(title);
+        problemDetail.setDetail(detail);
+        problemDetail.setType(URI.create(request.getServletPath()));
+        problemDetail.setProperty("TimeStamp", dtf.format(now));
+        return problemDetail;
     }
 
     // Tratar erros de validação

@@ -1,4 +1,4 @@
-package com.esl.springbootlogin.security.jwt.exception;
+package com.esl.springbootlogin.security.jwt.exception.refreshtoken;
 
 import org.modelmapper.spi.ErrorMessage;
 import org.springframework.http.HttpStatus;

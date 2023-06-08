@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.esl.springbootlogin.payload.jwt.RefreshToken;
 import com.esl.springbootlogin.repository.RefreshTokenRepository;
 import com.esl.springbootlogin.repository.UserRepository;
-import com.esl.springbootlogin.security.jwt.exception.TokenRefreshException;
+import com.esl.springbootlogin.security.jwt.exception.refreshtoken.TokenRefreshException;
 
 /* service which uses RefreshTokenRepository above 
 for providing several useful methods:
