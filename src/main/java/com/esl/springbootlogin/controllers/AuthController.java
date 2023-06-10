@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.esl.springbootlogin.dto.auth.request.LoginRequestRecord;
@@ -73,17 +74,44 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignupRequestRecord signUpRequest) {
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignupRequestRecord signUpRequest,
+            final HttpServletRequest request) {
         if (authservice.duplicateUser(signUpRequest)) {
-            return ResponseEntity.badRequest().body(new MessageResponseRecord("Error: Username is already taken!"));
+            return ResponseEntity.ok().body(new MessageResponseRecord("Erro: Nome de usuario já cadastrado!"));
         }
         if (authservice.duplicateEmail(signUpRequest)) {
-            return ResponseEntity.badRequest().body(new MessageResponseRecord("Error: Email is already in use!"));
+            return ResponseEntity.ok().body(new MessageResponseRecord("Erro: Email já cadastrado!"));
         }
 
-        authservice.register(signUpRequest);
+        authservice.register(signUpRequest, request);
+        /*
+         * Set<Role> roles = authservice.extracted(signUpRequest);
+         * User user = authservice.convertDtotoEntity(signUpRequest);
+         * user.setRoles(roles);
+         * 
+         * authservice.register2(user);
+         * publisher.publishEvent(new RegistrationCompleteEvent(user,
+         * applicationUrl(request)));
+         */
 
-        return ResponseEntity.ok(new MessageResponseRecord("Usuário cadastrado com sucesso!"));
+        return ResponseEntity.ok().body("success!");
+    }
+
+    @GetMapping("/verifyemail")
+    public ResponseEntity<Object> verifyemail(@RequestParam("token") String token) {
+        String verificationResult = authservice.validateToken(token);
+        if (verificationResult.equalsIgnoreCase("invalid")) {
+            return ResponseEntity.ok().body("token inválido.");
+        }
+        if (verificationResult.equalsIgnoreCase("enabled")) {
+            return ResponseEntity.ok().body("Conta já confirmada,por favor, faça o login");
+        }
+        if (verificationResult.equalsIgnoreCase("expired")) {
+            return ResponseEntity.ok().body("Tempo de confirmação expirado,refaça o envio do link de confirmação");
+        }
+
+        return ResponseEntity.ok().body("Email verificado com sucesso, faça o login");
+
     }
 
     @PostMapping("/signout")
