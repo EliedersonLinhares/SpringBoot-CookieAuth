@@ -199,7 +199,7 @@ public class AuthService {
             verificationTokenRepository.delete(token);
             return "expired";
         }
-        verificationTokenRepository.delete(token);
+        // verificationTokenRepository.delete(token);
         user.setEnabled(true);
         userRepository.save(user);
 
