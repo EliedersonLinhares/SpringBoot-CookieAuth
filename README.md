@@ -9,13 +9,16 @@ where JWT token is put on cookies for security purposes.currently
 developed on java 17
 
 v2.0
-Upgrade to java 17
 
-Upgrade to spring 3.0.7
+- Upgrade to java 17
+- Upgrade to spring 3.0.7
+- Upgrade to jsonwebtoken to 0.11
+- Refatoring Some dto's to use java records
 
-Upgrade to jsonwebtoken to 0.11
+v3.0
 
-Refatoring Some dto's to use java records
+- Now using link confirmation by email system
+- use regex pattern validator for strong password
 
 ## FronEnd system
 
@@ -25,15 +28,17 @@ Angular14-CookieAuth - https://github.com/EliedersonLinhares/Angular14-CookieAut
 
 ## Features
 
-`Use cookies to store JWT token` -> Http-only Cookies are used to avoid putting tokens on localstorage.
+<b>`Use cookies to store JWT token`</b> -> Http-only Cookies are used to avoid putting tokens on localstorage.
 
-`Refresh-token` -> To renew tokens for actual user
+<b>`Refresh-token`</b> -> To renew tokens for actual user
 
-`Use roles` -> To limit access in endpoints
+<b>`Use roles`</b> -> To limit access in endpoints
 
-`Use real database` -> MySql is used but can be change to another like PostgreSQL
+<b>`Use real database`</b> -> MySql is used but can be change to another like PostgreSQL
 
-`Validators` -> personalized errors messages for authentication,authorization and validation
+<b>`Validators`</b> -> personalized errors messages for authentication,authorization and validation
+
+<b>`Email confimation for register`</b> -> send email after registration with link to endpoint and enable user to access the system
 
 ## EndPoints
 
@@ -68,8 +73,8 @@ Schema with name int the application.properties file, my case is `security_examp
 
 ## Future plans
 
-- Use email for register confirmation
-- Use email fro reset password funcionality
+- <del>Use email for register confirmation</del> ✅
+- Use email for reset password funcionality
 
 ## References
 
