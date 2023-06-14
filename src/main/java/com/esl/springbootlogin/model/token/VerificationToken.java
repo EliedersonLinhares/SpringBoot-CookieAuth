@@ -26,7 +26,7 @@ public class VerificationToken {
     private String token;
     private Date expirationTime;
 
-    private static final int EXPIRATION_TIME = 15;
+    private static final int EXPIRATION_TIME = 1;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")

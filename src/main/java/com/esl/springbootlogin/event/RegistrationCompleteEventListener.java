@@ -50,7 +50,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         log.info("Url example: {}", url);
     }
 
-    private void sendVerificationEmail(String url) throws MessagingException, UnsupportedEncodingException {
+    public void sendVerificationEmail(String url) throws MessagingException, UnsupportedEncodingException {
         String subject = "Confimação de cadastro";
         String senderName = "Teste de cadastro com springboot";
         String mailContent = "<p> Olá, " + theUser.getUsername() + ", </p>" +

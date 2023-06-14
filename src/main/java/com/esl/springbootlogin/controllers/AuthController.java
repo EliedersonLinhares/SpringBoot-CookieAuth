@@ -1,5 +1,6 @@
 package com.esl.springbootlogin.controllers;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,9 @@ import com.esl.springbootlogin.dto.auth.request.LoginRequestRecord;
 import com.esl.springbootlogin.dto.auth.request.SignupRequestRecord;
 import com.esl.springbootlogin.dto.auth.response.MessageResponseRecord;
 import com.esl.springbootlogin.dto.auth.response.UserInfoResponse;
+import com.esl.springbootlogin.event.RegistrationCompleteEventListener;
 import com.esl.springbootlogin.model.jwt.RefreshToken;
+import com.esl.springbootlogin.model.token.VerificationToken;
 import com.esl.springbootlogin.security.jwt.JwtUtils;
 import com.esl.springbootlogin.security.jwt.exception.refreshtoken.TokenRefreshException;
 import com.esl.springbootlogin.security.services.UserDetailsImpl;
@@ -33,9 +36,11 @@ import com.esl.springbootlogin.services.AuthService;
 import com.esl.springbootlogin.services.LoggedInUser;
 import com.esl.springbootlogin.services.RefreshTokenService;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
@@ -43,12 +48,15 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
     private final AuthService authservice;
+    private final RegistrationCompleteEventListener eventListener;
+    private final HttpServletRequest servletRequest;
 
     @PostMapping("/signin")
     public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequestRecord loginRequest) {
@@ -82,36 +90,8 @@ public class AuthController {
         if (authservice.duplicateEmail(signUpRequest)) {
             return ResponseEntity.ok().body(new MessageResponseRecord("Erro: Email já cadastrado!"));
         }
-
         authservice.register(signUpRequest, request);
-        /*
-         * Set<Role> roles = authservice.extracted(signUpRequest);
-         * User user = authservice.convertDtotoEntity(signUpRequest);
-         * user.setRoles(roles);
-         * 
-         * authservice.register2(user);
-         * publisher.publishEvent(new RegistrationCompleteEvent(user,
-         * applicationUrl(request)));
-         */
-
-        return ResponseEntity.ok().body("success!");
-    }
-
-    @GetMapping("/verifyemail")
-    public ResponseEntity<Object> verifyemail(@RequestParam("token") String token) {
-        String verificationResult = authservice.validateToken(token);
-        if (verificationResult.equalsIgnoreCase("invalid")) {
-            return ResponseEntity.ok().body("token inválido.");
-        }
-        if (verificationResult.equalsIgnoreCase("enabled")) {
-            return ResponseEntity.ok().body("Conta já confirmada,por favor, faça o login");
-        }
-        if (verificationResult.equalsIgnoreCase("expired")) {
-            return ResponseEntity.ok().body("Tempo de confirmação expirado,refaça o envio do link de confirmação");
-        }
-
-        return ResponseEntity.ok().body("Email verificado com sucesso, faça o login");
-
+        return ResponseEntity.ok().body("usuario cadastrado com sucesso! Acesse seu email para confirmar o cadastro.");
     }
 
     @PostMapping("/signout")
@@ -181,9 +161,41 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN_OWNER')")
-    public String adminAccess() {
-        return "Admin board";
+    @GetMapping("/verifyemail")
+    public ResponseEntity<Object> verifyemail(@RequestParam("token") String token) {
+
+        String url = authservice.applicationUrl(servletRequest) + "/api/auth/resend-verificationtoken?token=" + token;
+
+        String verificationResult = authservice.validateToken(token);
+        if (verificationResult.equalsIgnoreCase("invalid")) {
+            return ResponseEntity.ok().body("token inválido.");
+        }
+        if (verificationResult.equalsIgnoreCase("enabled")) {
+            return ResponseEntity.ok().body("Conta já confirmada,por favor, faça o login");
+        }
+        if (verificationResult.equalsIgnoreCase("expired")) {
+            return ResponseEntity.ok().body(
+                    "Tempo de confirmação expirado,<a href=\"" + url
+                            + "\">Clique aqui! E obtenha um novo lik de confirmação.</a>");
+        }
+
+        return ResponseEntity.ok().body("Email verificado com sucesso, faça o login");
+
+    }
+
+    @GetMapping("/resend-verificationtoken")
+    public ResponseEntity<Object> resendVerificationToken(@RequestParam("token") String oldToken,
+            final HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
+        VerificationToken verificationToken = authservice.generateNewVerificationToken(oldToken);
+        resendVerificationTokenEmail(authservice.applicationUrl(request), verificationToken);
+        return ResponseEntity.ok().body("Novo link enviado para seu email, por favor, confirme para ativar sua conta");
+    }
+
+    private void resendVerificationTokenEmail(String applicationUrl, VerificationToken verificationToken)
+            throws UnsupportedEncodingException, MessagingException {
+
+        String url = applicationUrl + "/api/auth/verifyemail?token=" + verificationToken.getToken();
+        eventListener.sendVerificationEmail(url);
+        log.info("Url example: {}", url);
     }
 }
